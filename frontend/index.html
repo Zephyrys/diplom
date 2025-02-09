@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="uk">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Користувачі</title>
+		<style>
+			body {
+				margin-top: 100vh;
+				font-family: Arial, sans-serif;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				background-color: #f4f4f4;
+				flex-direction: column;
+			}
+			.container {
+				background: white;
+				padding: 20px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+				width: 300px;
+				margin-bottom: 20px;
+			}
+			input,
+			button {
+				width: 100%;
+				padding: 10px;
+				margin: 10px 0;
+				border: 1px solid #ccc;
+				border-radius: 5px;
+			}
+			button {
+				background-color: #28a745;
+				color: white;
+				cursor: pointer;
+				border: none;
+			}
+			button:hover {
+				background-color: #218838;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- Форма реєстрації -->
+		<div class="container">
+			<h2>Реєстрація</h2>
+			<form id="registerForm">
+				<input type="text" id="reg_name" placeholder="Ім'я" required />
+				<input type="email" id="reg_email" placeholder="Email" required />
+				<input
+					type="password"
+					id="reg_password"
+					placeholder="Пароль"
+					required
+				/>
+				<button type="submit">Зареєструватися</button>
+			</form>
+			<p id="reg_message"></p>
+		</div>
+
+		<!-- Форма входу -->
+		<div class="container">
+			<h2>Вхід</h2>
+			<form id="loginForm">
+				<input type="email" id="login_email" placeholder="Email" required />
+				<input
+					type="password"
+					id="login_password"
+					placeholder="Пароль"
+					required
+				/>
+				<button type="submit">Увійти</button>
+			</form>
+			<p id="login_message"></p>
+		</div>
+
+		<!-- Форма відновлення пароля -->
+		<div class="container">
+			<h2>Відновлення пароля</h2>
+			<form id="resetForm">
+				<input type="email" id="reset_email" placeholder="Email" required />
+				<button type="submit">Відновити</button>
+			</form>
+			<p id="reset_message"></p>
+		</div>
+
+		<!-- Отримання всіх користувачів -->
+		<div class="container">
+			<h2>Список користувачів</h2>
+			<button id="getUsers">Отримати користувачів</button>
+			<ul id="usersList"></ul>
+		</div>
+
+		<script>
+			// Функція для відправки запитів
+			async function sendRequest(url, method, body = null) {
+				const response = await fetch(url, {
+					method,
+					headers: { 'Content-Type': 'application/json' },
+					body: body ? JSON.stringify(body) : null
+				})
+				return response.json()
+			}
+
+			// Обробка реєстрації
+			document
+				.getElementById('registerForm')
+				.addEventListener('submit', async function (event) {
+					event.preventDefault()
+					const name = document.getElementById('reg_name').value
+					const email = document.getElementById('reg_email').value
+					const password = document.getElementById('reg_password').value
+					const data = await sendRequest(
+						'http://localhost:5000/api/auth/register',
+						'POST',
+						{ name, email, password }
+					)
+					document.getElementById('reg_message').textContent =
+						data.message || 'Помилка!'
+				})
+
+			// Обробка входу
+			document
+				.getElementById('loginForm')
+				.addEventListener('submit', async function (event) {
+					event.preventDefault()
+					const email = document.getElementById('login_email').value
+					const password = document.getElementById('login_password').value
+					const data = await sendRequest(
+						'http://localhost:5000/api/auth/login',
+						'POST',
+						{ email, password }
+					)
+					document.getElementById('login_message').textContent =
+						data.message || 'Помилка!'
+				})
+
+			// Обробка відновлення пароля
+			document
+				.getElementById('resetForm')
+				.addEventListener('submit', async function (event) {
+					event.preventDefault()
+					const email = document.getElementById('reset_email').value
+					const data = await sendRequest(
+						'http://localhost:5000/api/auth/reset-password',
+						'POST',
+						{ email }
+					)
+					document.getElementById('reset_message').textContent =
+						data.message || 'Помилка!'
+				})
+
+			// Отримання списку користувачів
+			document
+				.getElementById('getUsers')
+				.addEventListener('click', async function () {
+					const data = await sendRequest(
+						'http://localhost:5000/api/users',
+						'GET'
+					)
+					const usersList = document.getElementById('usersList')
+					usersList.innerHTML = ''
+					data.forEach(user => {
+						const li = document.createElement('li')
+						li.textContent = `${user.name} (${user.email})`
+						usersList.appendChild(li)
+					})
+				})
+		</script>
+	</body>
+</html>
