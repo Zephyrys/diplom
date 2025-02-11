@@ -43,17 +43,20 @@ class AuthController {
 			res.status(500).json({ error: error.message })
 		}
 	}
-	// TODO
 	static async resetPassword(req, res) {
 		try {
 			const { email, newPassword } = req.body
 
 			const user = await User.findOne({ email })
+			console.log('FOUND USER: ', user)
 			if (!user) return res.status(404).json({ error: 'User not found' })
-			console.log(user.password)
-			user.password = await PasswordService.hashPassword(newPassword)
-			await user.save()
 
+			console.log('OLD pass: ', user.password)
+			const newHashed = await PasswordService.hashPassword(newPassword)
+			console.log(newHashed)
+			console.log('NEW PASS: ', newPassword, ' HASHED IN: ', newHashed  )
+			await user.save({password:newHashed})
+			
 			res.status(200).json({ message: 'Password reset successful' })
 		} catch (error) {
 			res.status(500).json({ error: error.message })

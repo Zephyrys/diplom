@@ -81,6 +81,7 @@
 			<h2>Відновлення пароля</h2>
 			<form id="resetForm">
 				<input type="email" id="reset_email" placeholder="Email" required />
+				<input type="text" id="reset_password" placeholder="New password" required />
 				<button type="submit">Відновити</button>
 			</form>
 			<p id="reset_message"></p>
@@ -143,10 +144,11 @@
 				.addEventListener('submit', async function (event) {
 					event.preventDefault()
 					const email = document.getElementById('reset_email').value
+					const newPassword = document.getElementById('reset_password').value
 					const data = await sendRequest(
 						'http://localhost:5000/api/auth/reset-password',
 						'POST',
-						{ email }
+						{ email, newPassword }
 					)
 					document.getElementById('reset_message').textContent =
 						data.message || 'Помилка!'
